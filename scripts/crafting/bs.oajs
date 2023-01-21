@@ -81,9 +81,25 @@ const printAction = function (action, msg) {
   print('[' + action.label + ']: ' + msg)
 }
 
+/** @type {Action} Stop Action for script */
+const stopAction = function () {
+  const executor = function (global) {
+    global.stopFlag = true
+  }
+
+  const condition = function (global) {
+    const ingotsCount = Orion.Count(CONSTANTS.TYPES.INGOT, 0x0)
+    const craftable = global.currentCraftable
+
+    return craftable.ingotsMin > ingotsCount
+  }
+
+  return action('Not enough ressources', PRIORITIES.HIGH, executor, condition)
+}
+
 /**
  * @type {Action} Crafting action
- * 
+ *
  * Executor uses tool from {global.toolType} waits for
  * Gump and uses info from {global.currentCraftable}
  */
@@ -93,6 +109,7 @@ const craftAction = function () {
 
     Orion.UseType(global.toolType)
     Orion.WaitGump(Orion.CreateGumpHook(craftable.craftItemButton))
+    Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
   }
 
   const condition = function (global) {
@@ -182,6 +199,7 @@ const approachAnvilAction = function () {
 
   return action('ApproachAnvil', PRIORITIES.HIGH, executor, condition)
 }
+
 /**
  * @typedef {Object} Craftable
  * @property {string} label - Name of Item
@@ -230,27 +248,36 @@ const scriptRunner = function () {
       return runsCount.valueOf()
     },
     smeltButton: CONSTANTS.BS_GUMP.SMELT_BUTTON,
+    stopFlag: false,
   }
   run = function () {
     runsCount++
     var action
     Object.keys(actions).forEach(function (prio) {
-      while (actions[prio] && actions[prio].length) {
-        action = actions[prio].pop()
+      if (actions[prio] && actions[prio].length) {
+        actions[prio].forEach(function (action) {
+          // action = actions[prio].pop()
 
-        if (action && typeof action.executor === 'function') {
-          if (
-            typeof action.condition === 'function' &&
-            action.condition(global)
-          ) {
-            printAction(action, 'condition met, executing...')
-            action.executor(global)
-          } else {
-            printAction(action, 'condition NOT met, skipping...')
+          if (action && typeof action.executor === 'function') {
+            if (
+              typeof action.condition === 'function' &&
+              action.condition(global)
+            ) {
+              printAction(action, 'condition met, executing...')
+              action.executor(global)
+            } else {
+              printAction(action, 'condition NOT met, skipping...')
+            }
           }
-        }
+        })
       }
     })
+  }
+  runWhileCan = function () {
+    while (!global.stopFlag) {
+      run()
+      Orion.Wait(100)
+    }
   }
   registerAction = function (action) {
     const cd = action()
@@ -276,6 +303,7 @@ const scriptRunner = function () {
 function blacksmithyScript() {
   const runner = scriptRunner()
   runner.registerActions([
+    stopAction,
     hideAction,
     deadAction,
     approachAnvilAction,
@@ -283,7 +311,7 @@ function blacksmithyScript() {
     craftAction,
   ])
 
-  runner.run()
+  runner.runWhileCan()
 }
 
 /**
