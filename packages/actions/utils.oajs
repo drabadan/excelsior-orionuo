@@ -1,0 +1,12 @@
+//#include C:\Users\49160\dev\uo\scripts\orion_uo\uoex\excelsior-orionuo\packages\common\print.oajs
+
+/**
+ * Prints to uo client info
+ *
+ * @param {Action} action - callee
+ * @param {string} msg - message to print
+ */
+const printAction = function (action, msg) {
+    print('[' + action.label + ']: ' + msg)
+}
+  

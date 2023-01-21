@@ -1,0 +1,46 @@
+/**
+ * Priority Queue base crafter
+ */
+const scriptRunner = function (global) {
+  const actions = { 0: [], 1: [], 2: [] }
+  var runsCount = 0
+
+  run = function () {
+    runsCount++
+    var action
+    Object.keys(actions).forEach(function (prio) {
+      if (actions[prio] && actions[prio].length) {
+        actions[prio].forEach(function (action) {
+          if (action && typeof action.executor === 'function') {
+            if (
+              typeof action.condition === 'function' &&
+              action.condition(global)
+            ) {
+              action.executor(global)
+            } else {
+            }
+          }
+        })
+      }
+    })
+  }
+  runWhileCan = function () {
+    while (!global.stopFlag) {
+      run()
+      Orion.Wait(100)
+    }
+  }
+  registerAction = function (action) {
+    const cd = action()
+    actions[cd.priority].push(cd)
+  }
+  registerActions = function (actions) {
+    if (actions && actions.length) {
+      actions.reverse().forEach(function (action) {
+        registerAction(action)
+      })
+    }
+  }
+
+  return this
+}

@@ -1,0 +1,25 @@
+/**
+ * @typedef {Object} Craftable
+ * @property {string} label - Name of Item
+ * @property {number} type - serial {0x1234}
+ */
+var Craftable = {
+  label: 'item label',
+  type: 0,
+}
+
+/** @type {Craftable} */
+const RingmailGlovesCraftable = {
+  label: 'ringmail gloves',
+  ingotsMin: 10,
+  type: 0x13eb,
+  craftItemButton: 2,
+}
+
+/** @type {Craftable} */
+const RingmailSleevesCraftable = {
+  label: 'ringmail sleeves',
+  ingotsMin: 14,
+  type: 0x13ee,
+  craftItemButton: 16,
+}

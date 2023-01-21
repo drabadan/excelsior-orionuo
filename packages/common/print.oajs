@@ -1,0 +1,8 @@
+/**
+ * Prints message to UOClient
+ * @param {string} msg - message to print
+ */
+function print(msg) {
+    Orion.Print(0x0035, msg)
+  }
+  
