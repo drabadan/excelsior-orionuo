@@ -83,8 +83,7 @@ const printAction = function (action, msg) {
 
 /**
  * @type {Action} Crafting action
- *
- * Condition is - "true", so always should execute
+ * 
  * Executor uses tool from {global.toolType} waits for
  * Gump and uses info from {global.currentCraftable}
  */
