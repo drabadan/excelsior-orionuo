@@ -62,7 +62,10 @@ const smeltCraftedAction = function () {
     printAction(this, list.length)
 
     if (list.length) {
-      printAction(this, 'INFO: ' + list.length + ' Craftables present, smelting...')
+      printAction(
+        this,
+        'INFO: ' + list.length + ' Craftables present, smelting...'
+      )
       list.forEach(function (el) {
         Orion.UseType(global.toolType)
         Orion.WaitTargetObject(el)
