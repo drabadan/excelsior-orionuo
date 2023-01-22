@@ -1,0 +1,26 @@
+const CONSTANTS = {
+  TYPES: {
+    TINKER_TOOLS: 0x1eb8,
+    SHOVEL: 0x0f39,
+    INGOT: 0x1bf2,
+    HAMMER: 0x13e4,
+  },
+  WAIT_TIME: {
+    LONG_MS: 10000,
+    NORMAL: 5000,
+    SHORT: 2000,
+  },
+  BS_GUMP: {
+    SMELT_BUTTON: 14,
+  },
+  TINKER_GUMP: {
+    HAMMER_BUTTON: 49,
+  },
+}
+
+/** @enum {number} */
+const PRIORITY = {
+  HIGH: 0,
+  MEDIUM: 1,
+  LOW: 2,
+}

@@ -1,0 +1,100 @@
+//#include ..\..\packages\actions\utils.oajs
+//#include ..\..\packages\common\constants.oajs
+//#include actions.oajs
+
+/** @type {Action} Stop Action for script */
+const stopAction = function () {
+  const executor = function (global) {
+    global.stopFlag = true
+  }
+
+  const condition = function (global) {
+    const ingotsCount = Orion.Count(CONSTANTS.TYPES.INGOT, 0x0)
+    const craftable = global.currentCraftable
+
+    return craftable.ingotsMin > ingotsCount || Player.Dead()
+  }
+
+  return action('Not enough ressources', PRIORITY.HIGH, executor, condition)
+}
+
+/**
+ * @type {Action} Crafting action
+ *
+ * Executor uses tool from {global.toolType} waits for
+ * Gump and uses info from {global.currentCraftable}
+ */
+const craftAction = function () {
+  const executor = function (global) {
+    const craftable = global.currentCraftable
+
+    Orion.UseType(global.toolType)
+    Orion.WaitGump(Orion.CreateGumpHook(craftable.craftItemButton))
+    Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+  }
+
+  const condition = function (global) {
+    const craftable = global.currentCraftable
+    const ingotsCount = Orion.Count(CONSTANTS.TYPES.INGOT, 0x0)
+    const tools = Orion.FindType(global.toolType)
+    printAction(
+      this,
+      'INFO: ToolsCount ' + tools.length + ' IngotsCount: ' + ingotsCount
+    )
+
+    const res = tools.length && ingotsCount >= craftable.ingotsMin
+    if (!res) {
+      printAction(this, 'CRITICAL - No resources or tools, halting')
+    }
+
+    return res
+  }
+
+  return action('Craft Action', PRIORITY.LOW, executor, condition)
+}
+
+/** @type {Action} Smelt crafted item */
+const smeltCraftedAction = function () {
+  const executor = function (global) {
+    const craftable = global.currentCraftable
+    const list = Orion.FindType(craftable.type)
+
+    printAction(this, list.length)
+
+    if (list.length) {
+      printAction(this, 'INFO: ' + list.length + ' Craftables present, smelting...')
+      list.forEach(function (el) {
+        Orion.UseType(global.toolType)
+        Orion.WaitTargetObject(el)
+        Orion.WaitGump(Orion.CreateGumpHook(global.smeltButton))
+        Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+      })
+    }
+  }
+
+  const condition = function (global) {
+    const craftable = global.currentCraftable
+    const list = Orion.FindType(craftable.type)
+    return list.length
+  }
+
+  return action('smelt crafter', PRIORITY.MEDIUM, executor, condition)
+}
+
+/**@type {Action} Aproaching the Anvil to start Crafting */
+const approachAnvilAction = function () {
+  const executor = function (global) {
+    const coords = global.anvilCoordinates
+    Orion.WalkTo(coords.x, coords.y, coords.z, 1)
+  }
+
+  const condition = function (global) {
+    const dist = Orion.GetDistance(
+      global.anvilCoordinates.x,
+      global.anvilCoordinates.y
+    )
+    return dist > 1
+  }
+
+  return action('ApproachAnvil', PRIORITY.HIGH, executor, condition)
+}

@@ -3,6 +3,5 @@
  * @param {string} msg - message to print
  */
 function print(msg) {
-    Orion.Print(0x0035, msg)
-  }
-  
+  Orion.Print(0x0035, msg)
+}

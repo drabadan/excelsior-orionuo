@@ -1,0 +1,30 @@
+//#include ..\..\packages\actions\utils.oajs
+//#include ..\..\packages\common\constants.oajs
+//#include actions.oajs
+
+/** @type {Action} Hide Character */
+const hideAction = function () {
+  const executor = function () {
+    Orion.UseSkill('Hiding')
+    Orion.Wait(10000)
+  }
+
+  const condition = function () {
+    return !Player.Hidden()
+  }
+
+  return action('Hide', PRIORITY.HIGH, executor, condition)
+}
+
+/** @type {Action} Character is Dead*/
+const deadAction = function () {
+  const executor = function () {
+    Orion.PauseScript()
+  }
+
+  const condition = function () {
+    return Player.Dead()
+  }
+
+  return action('Dead', PRIORITY.HIGH, executor, condition)
+}

@@ -7,7 +7,6 @@ const scriptRunner = function (global) {
 
   run = function () {
     runsCount++
-    var action
     Object.keys(actions).forEach(function (prio) {
       if (actions[prio] && actions[prio].length) {
         actions[prio].forEach(function (action) {
