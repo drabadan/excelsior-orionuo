@@ -24,7 +24,8 @@ function blacksmithyScript() {
     hideAction,
     approachAnvilAction,
     smeltCraftedAction,
-    craftAction,
+    craftSmithHammerAction,
+    craftCurrentCraftableAction,
   ])
 
   runner.runWhileCan()

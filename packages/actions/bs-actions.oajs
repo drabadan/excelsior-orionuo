@@ -24,7 +24,7 @@ const stopAction = function () {
  * Executor uses tool from {global.toolType} waits for
  * Gump and uses info from {global.currentCraftable}
  */
-const craftAction = function () {
+const craftCurrentCraftableAction = function () {
   const executor = function (global) {
     const craftable = global.currentCraftable
 
@@ -100,4 +100,20 @@ const approachAnvilAction = function () {
   }
 
   return action('ApproachAnvil', PRIORITY.HIGH, executor, condition)
+}
+
+/**@type {Action} Crafts the smith's hammer if not found in backpack */
+const craftSmithHammerAction = function () {
+  const executor = function (global) {
+    Orion.UseType(global.tinkerTool)
+    Orion.WaitGump(Orion.CreateGumpHook(global.toolTinkerButton))
+    Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+  }
+
+  const condition = function (global) {
+    const list = Orion.FindType(global.toolType)
+    return !list.length
+  }
+
+  return action('Craft Smiths Hammer', PRIORITY.MEDIUM, executor, condition)
 }
