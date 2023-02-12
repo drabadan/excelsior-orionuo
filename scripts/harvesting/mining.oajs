@@ -1,0 +1,102 @@
+//#include packages\actions\common-actions.oajs
+//#include packages\actions\harvesting-actions.oajs
+//#include packages\actions\mining-actions.oajs
+//#include packages\runner\script-runner.oajs
+//#include packages\common\craftables.oajs
+//#include packages\common\constants.oajs
+
+const loadDoneTiles = function (global) {
+  const file = Orion.NewFile()
+  if (file.Open(global.sessionLogFileName)) {
+    print('File Opened Successfuly')
+    var data = file.ReadAll()
+    if (data) {
+      data = JSON.parse(data)
+      if (data.doneTiles) {
+        print('Done tiles len: ' + Object.keys(data.doneTiles).length)
+        global.miningSpots.doneTiles = data.doneTiles
+      }
+    }
+
+    file.Remove()
+  }
+}
+
+const initScript = function (global) {
+  loadDoneTiles(global)
+}
+
+function miningScript() {
+  print('Script Mining started...')
+
+  const global = {
+    sessionStart: 0,
+    tinkerTool: CONSTANTS.TYPES.TINKER_TOOLS,
+    toolTinkerButton: CONSTANTS.TINKER_GUMP.HAMMER_BUTTON,
+    toolType: CONSTANTS.TYPES.SHOVEL,
+    anvilCoordinates: { x: 2571, y: 482, z: 0 },
+    forgeCoordinates: { x: 2571, y: 482, z: 0 },
+    stopFlag: false,
+    flags: {
+      shouldGoToCave: true,
+      spotsNotSet: true,
+      saveLog: false,
+    },
+    caveSpot: {
+      x: 2570,
+      y: 484,
+      z: 0,
+    },
+    miningSpots: {
+      tiles: [],
+      currentTile: {},
+      currentTileIndex: -1,
+      doneTiles: {},
+      checkDepletionDelay: true,
+      // 1 200 000
+      depletionDelay: 20 /*min */ * 60 /*sec*/ * 1000 /*ms*/,
+    },
+    tileFlag: 'cave',
+    tilesSearchRadius: 10,
+    targetingJournalMessage: 'Where do you wish',
+    tileMessages:
+      'You put some|You loosen some|There is no metal|Try mining|is too far|no line of|seen',
+    skipTileMessages: ['too far', 'seen', 'no metal', "can't target"],
+    smeltMaxWeight: Player.MaxWeight() * 0.75,
+    forgeSerial: 0x4002e34c,
+    oreType: 0x19b9,
+    sessionLogFileName:
+      Orion.CurrentScriptDirPath() + '_mining_session_log.json',
+  }
+
+  global.sessionStart = Date.now()
+
+  const runner = scriptRunner(global)
+
+  runner.registerActions([
+    hideAction,
+    deadAction,
+    reachCaveSpotAction,
+    readTilesInCaveAction,
+    smeltOreAction,
+    craftTinkerToolsAction,
+    craftShovelAction,
+    mineSpotAction,
+    harvestingGumpAction,
+    saveSessionLogAction,
+  ])
+
+  initScript(global)
+  runner.runWhileCan()
+  print('Script Mining stopped.')
+}
+
+/**
+ * Script:
+ * 1. Try reach cave spot
+ * 2. Read harvesting tiles
+ * 3. Craft shovel
+ * 4. Mine spot
+ * 5. Smelt ore
+ * 6. Unload
+ */

@@ -1,0 +1,15 @@
+/**@type {Action} Crafts the Shovel */
+const craftShovelAction = function () {
+  const executor = function () {
+    Orion.UseType(CONSTANTS.TYPES.TINKER_TOOLS)
+    Orion.WaitGump(Orion.CreateGumpHook(CONSTANTS.TINKER_GUMP.SHOVEL_BUTTON))
+    Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+  }
+
+  const condition = function () {
+    const list = Orion.FindType(CONSTANTS.TYPES.SHOVEL)
+    return !list.length
+  }
+
+  return action('Craft Shovel', PRIORITY.HIGH, executor, condition)
+}

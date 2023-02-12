@@ -28,3 +28,21 @@ const deadAction = function () {
 
   return action('Dead', PRIORITY.HIGH, executor, condition)
 }
+
+/**@type {Action} Crafts the tinker tool */
+const craftTinkerToolsAction = function () {
+  const executor = function () {
+    Orion.UseType(CONSTANTS.TYPES.TINKER_TOOLS)
+    Orion.WaitGump(
+      Orion.CreateGumpHook(CONSTANTS.TINKER_GUMP.TINKER_TOOL_BUTTON)
+    )
+    Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+  }
+
+  const condition = function () {
+    const list = Orion.FindType(CONSTANTS.TYPES.TINKER_TOOLS)
+    return list.length === 1
+  }
+
+  return action('Craft Smiths Hammer', PRIORITY.HIGH, executor, condition)
+}

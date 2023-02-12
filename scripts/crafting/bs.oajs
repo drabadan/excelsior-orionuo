@@ -9,7 +9,7 @@ function blacksmithyScript() {
     tinkerTool: CONSTANTS.TYPES.TINKER_TOOLS,
     toolTinkerButton: CONSTANTS.TINKER_GUMP.HAMMER_BUTTON,
     toolType: CONSTANTS.TYPES.HAMMER,
-    currentCraftable: RingmailSleevesCraftable,
+    currentCraftable: CutlassCraftable,
     anvilCoordinates: { x: 2571, y: 482, z: 0 },
     runsCount: function () {
       return runsCount.valueOf()
@@ -23,6 +23,7 @@ function blacksmithyScript() {
     stopAction,
     hideAction,
     approachAnvilAction,
+    craftTinkerToolsAction,
     smeltCraftedAction,
     craftSmithHammerAction,
     craftCurrentCraftableAction,

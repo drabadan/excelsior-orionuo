@@ -91,7 +91,7 @@ const approachAnvilAction = function () {
     Orion.WalkTo(coords.x, coords.y, coords.z, 1)
   }
 
-  const condition = function (global) {
+  const condition = function (global) {    
     const dist = Orion.GetDistance(
       global.anvilCoordinates.x,
       global.anvilCoordinates.y

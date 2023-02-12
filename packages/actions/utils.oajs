@@ -9,3 +9,21 @@
 const printAction = function (action, msg) {
   print('[' + action.label + ']: ' + msg)
 }
+/**
+ * Search some string in array of strings
+ *
+ * @param {string} string string to find
+ * @param {string[]} list string array
+ * @returns {boolean}
+ */
+function substInList(string, list) {
+  var result = false
+  list.forEach(function (element) {
+    if (Orion.Contains(string, element)) {
+      print('Matched ' + element + ' to ' + string, true)
+      result = true
+    }
+  })
+
+  return result
+}

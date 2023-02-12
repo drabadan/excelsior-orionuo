@@ -1,0 +1,43 @@
+//#include utils.oajs
+
+const setCurrentMiningSpotAction = function (global) {
+  if (
+    global.miningSpots.tiles.length - 1 <=
+    global.miningSpots.currentTileIndex
+  ) {
+    global.miningSpots.currentTileIndex = 0
+  } else if (global.miningSpots.currentTileIndex < 0) {
+    global.miningSpots.currentTileIndex = 0
+  } else {
+    global.miningSpots.currentTileIndex++
+  }
+
+  global.miningSpots.currentTile = findNextValidTile(global)
+}
+
+const findNextValidTile = function (global) {
+  var nextTile = global.miningSpots.tiles[global.miningSpots.currentTileIndex]
+  if (global.miningSpots.checkDepletionDelay && global.miningSpots.doneTiles) {
+    const lastDepletion =
+      global.miningSpots.doneTiles[nextTile.X() + '__' + nextTile.Y()]
+
+    const availableAt = lastDepletion + global.miningSpots.depletionDelay
+
+    if (lastDepletion && availableAt > Date.now()) {
+      const availableInMin = (availableAt - Date.now()) / 1000 / 60
+      print(
+        'Depletion delay, too soon to mine: ' +
+          nextTile.X() +
+          '__' +
+          nextTile.Y() +
+          '; remaining delay time: ' +
+          Math.round(availableInMin) +
+          ' minutes'
+      )
+      Orion.Wait(1000)
+      return findNextValidTile(global)
+    }
+  }
+
+  return nextTile
+}

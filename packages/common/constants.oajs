@@ -14,8 +14,13 @@ const CONSTANTS = {
     SMELT_BUTTON: 14,
   },
   TINKER_GUMP: {
-    HAMMER_BUTTON: 49,
+    MAKE_LAST_BUTTON: 49,
+    HAMMER_BUTTON: 100,
+    TINKER_TOOL_BUTTON: 23,
+    SHOVEL_BUTTON: 72,
   },
+  ALWARM_VAW_PATH:
+    'C:/Users/49160/dev/uo/scripts/orion_uo/uoex/excelsior-orionuo/misc/assets/alarm.wav',
 }
 
 /** @enum {number} */

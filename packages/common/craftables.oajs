@@ -8,6 +8,7 @@ var Craftable = {
   type: 0,
 }
 
+//#region Blacksmithy
 /** @type {Craftable} */
 const RingmailGlovesCraftable = {
   label: 'ringmail gloves',
@@ -23,3 +24,17 @@ const RingmailSleevesCraftable = {
   type: 0x13ee,
   craftItemButton: 16,
 }
+
+/** @type {Craftable} */
+const CutlassCraftable = {
+  label: 'Cutlass',
+  ingotsMin: 8,
+  type: 0x1441,
+  craftItemButton: 23,
+}
+
+//#endregion
+
+//#region Tinkering
+
+//#endregion

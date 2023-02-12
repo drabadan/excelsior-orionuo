@@ -1,0 +1,217 @@
+//#include ..\..\packages\common\constants.oajs
+//#include actions.oajs
+//#include utils.oajs
+//#include harvesting-functions.oajs
+
+/** @type {Action} Check Harvesting Gump */
+const harvestingGumpAction = function () {
+  const executor = function () {
+    Orion.PlayWav(CONSTANTS.ALWARM_VAW_PATH)
+  }
+
+  const condition = function () {
+    const gumpCount = Orion.GumpCount()
+    if (gumpCount > 0) {
+      for (var i = 0; i < gumpCount; i++) {
+        const gump = Orion.GetGump(i)
+        if (Orion.Contains(gump.TextList().join(','), 'Enter the letters')) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+
+  return action(
+    'Check Harvesting Antimacro Gump',
+    PRIORITY.HIGH,
+    executor,
+    condition
+  )
+}
+
+/**@type {Action} Try reach cave spot */
+const reachCaveSpotAction = function () {
+  const executor = function (global) {
+    if (
+      !Orion.WalkTo(global.caveSpot.x, global.caveSpot.y, global.caveSpot.z, 1)
+    ) {
+      printAction(this, 'CRITICAL - Cannot reach cave!')
+    } else {
+      while (Orion.IsWalking()) {
+        Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+      }
+      global.flags.shouldGoToCave = false
+    }
+  }
+
+  const condition = function (global) {
+    return global.flags.shouldGoToCave
+  }
+
+  return action('Travel to cave', PRIORITY.MEDIUM, executor, condition)
+}
+
+/** @type {Action} Read Tiles in cave */
+const readTilesInCaveAction = function () {
+  const executor = function (global) {
+    var tilesList = Orion.GetTilesInRect(
+      global.tileFlag,
+      Player.X() + global.tilesSearchRadius,
+      Player.Y() + global.tilesSearchRadius,
+      Player.X() - global.tilesSearchRadius,
+      Player.Y() - global.tilesSearchRadius
+    )
+
+    tilesList = tilesList.filter(function (el) {
+      return Orion.GetPathArray(el.X(), el.Y()).length > 0
+    })
+
+    if (tilesList.length) {
+      global.flags.spotsNotSet = false
+      global.miningSpots.tiles = global.miningSpots.tiles.concat(tilesList)
+
+      printAction(
+        this,
+        'Mining spots total count: ' + global.miningSpots.tiles.length
+      )
+
+      setCurrentMiningSpotAction(global)
+    } else {
+      printAction(this, 'None mining spots found...')
+    }
+  }
+
+  const condition = function (global) {
+    return (
+      global.flags.spotsNotSet &&
+      Orion.GetDistance(global.caveSpot.x, global.caveSpot.y) < 2
+    )
+  }
+
+  return action('Harvesting spots reader', PRIORITY.MEDIUM, executor, condition)
+}
+
+/** @type {Action} Mine Spot */
+const mineSpotAction = function () {
+  const executor = function (global) {
+    const tile = global.miningSpots.currentTile
+
+    if (!Orion.WalkTo(tile.X(), tile.Y(), tile.Z(), 1)) {
+      printAction(
+        this,
+        'Spot ' + tile.X() + ' - ' + tile.Y() + ' not reachable'
+      )
+      return
+    }
+    if (
+      Orion.ValidateTargetTile(tile.Graphic(), tile.X(), tile.Y(), tile.Z())
+    ) {
+      if (Orion.HaveTarget()) Orion.CancelWaitTarget()
+
+      if (!Orion.UseType(global.toolType)) {
+        printAction(this, 'No tool')
+        return
+      }
+
+      Orion.WaitJournal(
+        global.targetingJournalMessage,
+        Orion.Now(),
+        Orion.Now() + 2000,
+        'me|sys'
+      )
+
+      printAction(
+        this,
+        tile.Graphic() + ' ' + tile.X() + ' ' + tile.Y() + ' ' + tile.Z()
+      )
+
+      Orion.TargetTile(tile.Graphic(), tile.X(), tile.Y(), Player.Z())
+      var result = Orion.WaitJournal(
+        global.tileMessages,
+        Orion.Now(),
+        Orion.Now() + 7000,
+        'me|sys'
+      )
+      // TODO: Refactor this
+      if (result && substInList(result.Text(), global.skipTileMessages)) {
+        printAction(this, 'Tile depleted')
+        Orion.Wait(300)
+        setCurrentMiningSpotAction(global)
+        global.miningSpots.doneTiles[tile.X() + '__' + tile.Y()] = Date.now()
+        global.flags.saveLog = true
+        return
+      }
+    }
+  }
+
+  const condition = function (global) {
+    return global.miningSpots.currentTileIndex >= 0
+  }
+
+  return action('Harvest spot', PRIORITY.LOW, executor, condition)
+}
+
+/** @type {Action} Smelt the Ore */
+const smeltOreAction = function () {
+  const executor = function (global) {
+    Orion.WalkTo(
+      global.forgeCoordinates.x,
+      global.forgeCoordinates.y,
+      global.forgeCoordinates.z,
+      1
+    )
+    var ores = Orion.FindType(global.oreType, -1, 'backpack')
+    ores.forEach(function (ore) {
+      Orion.UseObject(ore)
+      Orion.WaitJournal(
+        'Select the forge',
+        Orion.Now(),
+        Orion.Now() + 1000,
+        'me|sys'
+      )
+      Orion.TargetObject(global.forgeSerial)
+      Orion.WaitJournal(
+        'You burn away|You smelt',
+        Orion.Now(),
+        Orion.Now() + 1000,
+        'me|sys'
+      )
+      Orion.Wait(500)
+    })
+  }
+
+  const condition = function (global) {
+    return (
+      Player.Weight() >= global.smeltMaxWeight &&
+      Orion.Count(global.oreType) > 0
+    )
+  }
+
+  return action('Smelt the Ore', PRIORITY.HIGH, executor, condition)
+}
+
+/** @type {Action} Save log Session */
+const saveSessionLogAction = function () {
+  const executor = function (global) {
+    global.flags.saveLog = false
+
+    const file = Orion.NewFile()
+    file.Open(global.sessionLogFileName)
+    const contents = {
+      sessionStart: global.sessionStart,
+      char: Player.FullName(),
+      doneTiles: global.miningSpots.doneTiles,
+    }
+
+    file.Write(JSON.stringify(contents))
+    printAction(this, 'saved session log')
+    file.Close()
+  }
+
+  const condition = function (global) {
+    return global.flags.saveLog
+  }
+
+  return action('Save Log Session', PRIORITY.MEDIUM, executor, condition)
+}
