@@ -12,11 +12,8 @@ const setCurrentMiningSpotAction = function (global) {
     global.miningSpots.currentTileIndex++
   }
 
-  global.miningSpots.currentTile = findNextValidTile(global)
-}
+  const nextTile = global.miningSpots.tiles[global.miningSpots.currentTileIndex]
 
-const findNextValidTile = function (global) {
-  var nextTile = global.miningSpots.tiles[global.miningSpots.currentTileIndex]
   if (global.miningSpots.checkDepletionDelay && global.miningSpots.doneTiles) {
     const lastDepletion =
       global.miningSpots.doneTiles[nextTile.X() + '__' + nextTile.Y()]
@@ -34,10 +31,9 @@ const findNextValidTile = function (global) {
           Math.round(availableInMin) +
           ' minutes'
       )
-      Orion.Wait(1000)
-      return findNextValidTile(global)
+      Orion.Wait(50)
+      return setCurrentMiningSpotAction(global)
     }
   }
-
-  return nextTile
+  global.miningSpots.currentTile = nextTile
 }
