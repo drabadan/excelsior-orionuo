@@ -2,23 +2,36 @@
 
 const setCurrentMiningSpotAction = function (global) {
   if (
-    global.miningSpots.tiles.length - 1 <=
-    global.miningSpots.currentTileIndex
+    global.harvestingSpots.tiles.length - 1 <=
+    global.harvestingSpots.currentTileIndex
   ) {
-    global.miningSpots.currentTileIndex = 0
-  } else if (global.miningSpots.currentTileIndex < 0) {
-    global.miningSpots.currentTileIndex = 0
+    global.harvestingSpots.currentTileIndex = 0
+  } else if (global.harvestingSpots.currentTileIndex < 0) {
+    global.harvestingSpots.currentTileIndex = 0
   } else {
-    global.miningSpots.currentTileIndex++
+    global.harvestingSpots.currentTileIndex++
   }
 
-  const nextTile = global.miningSpots.tiles[global.miningSpots.currentTileIndex]
+  if (
+    typeof global.harvestingSpots.tiles[
+      global.harvestingSpots.currentTileIndex
+    ] === 'undefined'
+  ) {
+    return print('CRITICAL NextTile is undefined')
+  }
 
-  if (global.miningSpots.checkDepletionDelay && global.miningSpots.doneTiles) {
+  const nextTile =
+    global.harvestingSpots.tiles[global.harvestingSpots.currentTileIndex]
+
+  if (
+    typeof nextTile !== 'undefined' &&
+    global.harvestingSpots.checkDepletionDelay &&
+    global.harvestingSpots.doneTiles
+  ) {
     const lastDepletion =
-      global.miningSpots.doneTiles[nextTile.X() + '__' + nextTile.Y()]
+      global.harvestingSpots.doneTiles[nextTile.X() + '__' + nextTile.Y()]
 
-    const availableAt = lastDepletion + global.miningSpots.depletionDelay
+    const availableAt = lastDepletion + global.harvestingSpots.depletionDelay
 
     if (lastDepletion && availableAt > Date.now()) {
       const availableInMin = (availableAt - Date.now()) / 1000 / 60
@@ -35,5 +48,22 @@ const setCurrentMiningSpotAction = function (global) {
       return setCurrentMiningSpotAction(global)
     }
   }
-  global.miningSpots.currentTile = nextTile
+  global.harvestingSpots.currentTile = nextTile
+}
+
+const loadDoneTiles = function (global) {
+  const file = Orion.NewFile()
+  if (file.Open(global.sessionLogFileName)) {
+    print('File Opened Successfuly')
+    var data = file.ReadAll()
+    if (data) {
+      data = JSON.parse(data)
+      if (data.doneTiles) {
+        print('Done tiles len: ' + Object.keys(data.doneTiles).length)
+        global.harvestingSpots.doneTiles = data.doneTiles
+      }
+    }
+
+    file.Remove()
+  }
 }

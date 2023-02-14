@@ -33,6 +33,22 @@ const CutlassCraftable = {
   craftItemButton: 23,
 }
 
+/** @type {Craftable} */
+const ShortSpearCraftable = {
+  label: 'Short Spear',
+  ingotsMin: 6,
+  type: 0x1403,
+  craftItemButton: 44,
+}
+
+/** @type {Craftable} */
+const CircletCraftable = {
+  label: 'Circlet',
+  ingotsMin: 6,
+  type: 0x2b6e,
+  craftItemButton: 2,
+}
+
 //#endregion
 
 //#region Tinkering

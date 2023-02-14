@@ -1,5 +1,6 @@
 //#include packages\actions\common-actions.oajs
 //#include packages\actions\harvesting-actions.oajs
+//#include packages\actions\lumberjacking-actions.oajs
 //#include packages\actions\mining-actions.oajs
 //#include packages\runner\script-runner.oajs
 //#include packages\common\craftables.oajs
@@ -9,27 +10,24 @@ const initScript = function (global) {
   loadDoneTiles(global)
 }
 
-function miningScript() {
-  print('Script Mining started...')
+function lumberjackingScript() {
+  print('Script Lumberjacking started...')
 
   const global = {
     sessionStart: 0,
     tinkerTool: CONSTANTS.TYPES.TINKER_TOOLS,
     toolTinkerButton: CONSTANTS.TINKER_GUMP.HAMMER_BUTTON,
-    toolType: CONSTANTS.TYPES.SHOVEL,
-    anvilCoordinates: { x: 2571, y: 482, z: 0 },
-    forgeCoordinates: { x: 2571, y: 482, z: 0 },
+    toolType: CONSTANTS.TYPES.HATCHET,
     stopFlag: false,
     flags: {
-      shouldGoToCave: true,
       spotsNotSet: true,
       saveLog: false,
     },
-    caveSpot: {
-      x: 2570,
-      y: 484,
-      z: 0,
-    },
+    readTilesSpots: [
+      { x: 2551, y: 594, z: 0 },
+      /*{ x: 2472, y: 499, z: 15 },
+      { x: 2513, y: 496, z: 15 },*/
+    ],
     harvestingSpots: {
       tiles: [],
       currentTile: {},
@@ -39,17 +37,26 @@ function miningScript() {
       // 1 200 000
       depletionDelay: 20 /*min */ * 60 /*sec*/ * 1000 /*ms*/,
     },
-    tileFlag: 'cave',
-    tilesSearchRadius: 10,
-    targetingJournalMessage: 'Where do you wish',
+    tileFlag: 'tree',
+    tilesSearchRadius: 20,
     tileMessages:
-      'You put some|You loosen some|There is no metal|Try mining|is too far|no line of|seen',
-    skipTileMessages: ['too far', 'seen', 'no metal', "can't target"],
-    smeltMaxWeight: Player.MaxWeight() * 0.75,
-    forgeSerial: 0x4002e34c,
-    oreType: 0x19b9,
+      'You hack|You put|wood here to harvest|is too far|no line of|seen',
+    skipTileMessages: [
+      'wood here to harvest',
+      'too far',
+      'seen',
+      "can't target",
+    ],
+    smeltMaxWeight: Player.MaxWeight() * 0.5,
+    unloadWeight: Player.MaxWeight() * 0.65,
+    unloadContainer: 0x479bcf2e,
     sessionLogFileName:
-      Orion.CurrentScriptDirPath() + '/mining_session.log.json',
+      Orion.CurrentScriptDirPath() + '/lumberjacking_session.log.json',
+    unloadPoint: {
+      x: 2513,
+      y: 557,
+      z: 0,
+    },
   }
 
   global.sessionStart = Date.now()
@@ -57,13 +64,14 @@ function miningScript() {
   const runner = scriptRunner(global)
 
   runner.registerActions([
-    hideAction,
+    // hideAction,
     deadAction,
-    reachCaveSpotAction,
-    readTilesInCaveAction,
-    smeltOreAction,
+    readTilesAction,
     craftTinkerToolsAction,
-    craftShovelAction,
+    stackBoardsAction,
+    craftBoardsAction,
+    unloadLogsAction,
+    equipHatchetAction,
     mineSpotAction,
     harvestingGumpAction,
     saveSessionLogAction,

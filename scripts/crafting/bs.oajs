@@ -9,8 +9,9 @@ function blacksmithyScript() {
     tinkerTool: CONSTANTS.TYPES.TINKER_TOOLS,
     toolTinkerButton: CONSTANTS.TINKER_GUMP.HAMMER_BUTTON,
     toolType: CONSTANTS.TYPES.HAMMER,
-    currentCraftable: CutlassCraftable,
-    anvilCoordinates: { x: 2571, y: 482, z: 0 },
+    currentCraftable: CircletCraftable,
+    // anvilCoordinates: { x: 2571, y: 482, z: 0 },
+    anvilCoordinates: { x: 2466, y: 556, z: 5 },
     runsCount: function () {
       return runsCount.valueOf()
     },
@@ -24,9 +25,9 @@ function blacksmithyScript() {
     hideAction,
     approachAnvilAction,
     craftTinkerToolsAction,
-    smeltCraftedAction,
     craftSmithHammerAction,
     craftCurrentCraftableAction,
+    smeltCraftedAction,
   ])
 
   runner.runWhileCan()
@@ -48,3 +49,4 @@ function blacksmithyScript() {
 90 - 97	Plate Legs (20), Circlet (6)
 97 - 120	Plate Hiro Sode (16), Royal Circlet (6)
  */
+// 0x0f43 Hatchet

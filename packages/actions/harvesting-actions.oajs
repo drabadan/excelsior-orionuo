@@ -57,10 +57,10 @@ const readTilesInCaveAction = function () {
   const executor = function (global) {
     var tilesList = Orion.GetTilesInRect(
       global.tileFlag,
-      Player.X() + global.tilesSearchRadius,
-      Player.Y() + global.tilesSearchRadius,
       Player.X() - global.tilesSearchRadius,
-      Player.Y() - global.tilesSearchRadius
+      Player.Y() - global.tilesSearchRadius,
+      Player.X() + global.tilesSearchRadius,
+      Player.Y() + global.tilesSearchRadius
     )
 
     tilesList = tilesList.filter(function (el) {
@@ -69,11 +69,12 @@ const readTilesInCaveAction = function () {
 
     if (tilesList.length) {
       global.flags.spotsNotSet = false
-      global.miningSpots.tiles = global.miningSpots.tiles.concat(tilesList)
+      global.harvestingSpots.tiles =
+        global.harvestingSpots.tiles.concat(tilesList)
 
       printAction(
         this,
-        'Mining spots total count: ' + global.miningSpots.tiles.length
+        'Mining spots total count: ' + global.harvestingSpots.tiles.length
       )
 
       setCurrentMiningSpotAction(global)
@@ -95,7 +96,7 @@ const readTilesInCaveAction = function () {
 /** @type {Action} Mine Spot */
 const mineSpotAction = function () {
   const executor = function (global) {
-    const tile = global.miningSpots.currentTile
+    const tile = global.harvestingSpots.currentTile
 
     if (!Orion.WalkTo(tile.X(), tile.Y(), tile.Z(), 1)) {
       printAction(
@@ -109,36 +110,40 @@ const mineSpotAction = function () {
     ) {
       if (Orion.HaveTarget()) Orion.CancelWaitTarget()
 
+      Orion.WaitTargetTile(tile.Graphic(), tile.X(), tile.Y(), Player.Z())
       if (!Orion.UseType(global.toolType)) {
         printAction(this, 'No tool')
+
         return
       }
 
-      Orion.WaitJournal(
+      /*Orion.WaitJournal(
         global.targetingJournalMessage,
         Orion.Now(),
-        Orion.Now() + 2000,
+        Orion.Now() + 10000,
         'me|sys'
-      )
+      )*/
 
-      printAction(
-        this,
-        tile.Graphic() + ' ' + tile.X() + ' ' + tile.Y() + ' ' + tile.Z()
-      )
+      if (global.debug)
+        printAction(
+          this,
+          tile.Graphic() + ' ' + tile.X() + ' ' + tile.Y() + ' ' + tile.Z()
+        )
 
-      Orion.TargetTile(tile.Graphic(), tile.X(), tile.Y(), Player.Z())
       var result = Orion.WaitJournal(
         global.tileMessages,
         Orion.Now(),
         Orion.Now() + 7000,
         'me|sys'
       )
+
       // TODO: Refactor this
       if (result && substInList(result.Text(), global.skipTileMessages)) {
         printAction(this, 'Tile depleted')
         Orion.Wait(300)
         setCurrentMiningSpotAction(global)
-        global.miningSpots.doneTiles[tile.X() + '__' + tile.Y()] = Date.now()
+        global.harvestingSpots.doneTiles[tile.X() + '__' + tile.Y()] =
+          Date.now()
         global.flags.saveLog = true
         return
       }
@@ -146,7 +151,7 @@ const mineSpotAction = function () {
   }
 
   const condition = function (global) {
-    return global.miningSpots.currentTileIndex >= 0
+    return global.harvestingSpots.currentTileIndex >= 0
   }
 
   return action('Harvest spot', PRIORITY.LOW, executor, condition)
@@ -201,7 +206,7 @@ const saveSessionLogAction = function () {
     const contents = {
       sessionStart: global.sessionStart,
       char: Player.FullName(),
-      doneTiles: global.miningSpots.doneTiles,
+      doneTiles: global.harvestingSpots.doneTiles,
     }
 
     file.Write(JSON.stringify(contents))
@@ -214,4 +219,59 @@ const saveSessionLogAction = function () {
   }
 
   return action('Save Log Session', PRIORITY.MEDIUM, executor, condition)
+}
+
+/** @type {Action} Read Tiles in cave */
+const readTilesAction = function () {
+  const executor = function (global) {
+    if (!global.readTilesSpots.length) {
+      printAction(this, 'There are no harvesting spots available!')
+      return
+    }
+
+    var tilesMap = {}
+
+    global.readTilesSpots.forEach(function (spot) {
+      Orion.WalkTo(spot.x, spot.y, spot.z, 1)
+
+      var tilesList = Orion.GetTilesInRect(
+        'tree',
+        Player.X() - global.tilesSearchRadius,
+        Player.Y() - global.tilesSearchRadius,
+        Player.X() + global.tilesSearchRadius,
+        Player.Y() + global.tilesSearchRadius
+      )
+
+      tilesList = tilesList
+        .filter(function (el) {
+          return Orion.GetPathArray(el.X(), el.Y()).length > 0
+        })
+        .forEach(function (tile) {
+          tilesMap[tile.X() + '__' + tile.Y()] = tile
+        })
+    })
+
+    if (Object.keys(tilesMap).length) {
+      global.flags.spotsNotSet = false
+      global.harvestingSpots.tiles = []
+      Object.keys(tilesMap).forEach(function (tileKey) {
+        global.harvestingSpots.tiles.push(tilesMap[tileKey])
+      })
+
+      printAction(
+        this,
+        'Harvesting spots total count: ' + global.harvestingSpots.tiles.length
+      )
+
+      setCurrentMiningSpotAction(global)
+    } else {
+      printAction(this, 'None harvesting spots found...')
+    }
+  }
+
+  const condition = function (global) {
+    return global.flags.spotsNotSet
+  }
+
+  return action('Harvesting spots reader', PRIORITY.MEDIUM, executor, condition)
 }

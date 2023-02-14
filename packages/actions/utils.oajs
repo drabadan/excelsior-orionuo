@@ -27,3 +27,28 @@ function substInList(string, list) {
 
   return result
 }
+/**
+ * Finds items by type and returns map,
+ * where colors are keys and GameObject[] as values
+ *
+ * @param {string} type which item to look for
+ * @returns {object}
+ */
+function findTypeToMapOfColors(type) {
+  const colorsMap = {}
+
+  const list = Orion.FindType(type, 0xffff)
+
+  if (list.length) {
+    list.forEach(function (el) {
+      const obj = Orion.FindObject(el)
+      if (colorsMap[obj.Color()]) {
+        colorsMap[obj.Color()].push(obj)
+      } else {
+        colorsMap[obj.Color()] = [obj]
+      }
+    })
+  }
+
+  return colorsMap
+}

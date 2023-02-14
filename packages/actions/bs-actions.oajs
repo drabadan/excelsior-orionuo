@@ -91,7 +91,7 @@ const approachAnvilAction = function () {
     Orion.WalkTo(coords.x, coords.y, coords.z, 1)
   }
 
-  const condition = function (global) {    
+  const condition = function (global) {
     const dist = Orion.GetDistance(
       global.anvilCoordinates.x,
       global.anvilCoordinates.y
@@ -105,8 +105,8 @@ const approachAnvilAction = function () {
 /**@type {Action} Crafts the smith's hammer if not found in backpack */
 const craftSmithHammerAction = function () {
   const executor = function (global) {
-    Orion.UseType(global.tinkerTool)
-    Orion.WaitGump(Orion.CreateGumpHook(global.toolTinkerButton))
+    Orion.UseType(CONSTANTS.TYPES.TINKER_TOOLS)
+    Orion.WaitGump(Orion.CreateGumpHook(CONSTANTS.TINKER_GUMP.HAMMER_BUTTON))
     Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
   }
 
@@ -115,5 +115,5 @@ const craftSmithHammerAction = function () {
     return !list.length
   }
 
-  return action('Craft Smiths Hammer', PRIORITY.MEDIUM, executor, condition)
+  return action('Craft Smiths Hammer', PRIORITY.HIGH, executor, condition)
 }

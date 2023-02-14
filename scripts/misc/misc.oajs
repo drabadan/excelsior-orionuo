@@ -2,8 +2,22 @@ function printGumpInfo() {
   TextWindow.Open()
   const gi = Orion.GetGump(-1)
   TextWindow.Print(JSON.stringify(Orion.InfoGump()))
-
 }
+
+function ObjAtLayer() {
+	const obj = Orion.ObjAtLayer('LeftHand')
+	Orion.Print(obj.Graphic())
+	Orion.Print(0x0F43.toString(16))
+	Orion.Print(parseInt(obj.Graphic(), 16) === 0x0F43)
+}
+
+function cont() {
+	const obj = Orion.FindObject(backpack);
+	
+	Orion.Print(JSON.stringify(obj.Properties()));
+}
+
+
 const ButtonList = [
   ' button 15 402 4017 4019 1 0 0 ',
   ' button 270 402 4005 4007 1 0 21 ',

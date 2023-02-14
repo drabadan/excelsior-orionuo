@@ -1,0 +1,104 @@
+//#include utils.oajs
+
+/**@type {Action} equip hatchet */
+const equipHatchetAction = function () {
+  const executor = function (global) {
+    Orion.Unequip('LeftHand')
+    Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+    Orion.EquipT(CONSTANTS.TYPES.HATCHET)
+    Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+  }
+
+  const condition = function (global) {
+    const obj = Orion.ObjAtLayer('LeftHand')
+    if (obj) {
+      return parseInt(obj.Graphic(), 16) !== CONSTANTS.TYPES.HATCHET
+    }
+
+    return true
+  }
+
+  return action('Equip Hatchet', PRIORITY.MEDIUM, executor, condition)
+}
+
+/**@type {Action} equip hatchet */
+const craftBoardsAction = function () {
+  const executor = function (global) {
+    const logsList = Orion.FindType(CONSTANTS.TYPES.LOGS, 0xffff)
+    if (logsList.length) {
+      logsList.forEach(function (id) {
+        Orion.WaitTargetObject(id)
+        Orion.UseType(CONSTANTS.TYPES.HATCHET)
+        Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+      })
+    }
+  }
+
+  const condition = function (global) {
+    return Player.Weight() >= global.smeltMaxWeight
+  }
+
+  return this.action('Craft Boards', PRIORITY.MEDIUM, executor, condition)
+}
+
+/**@type {Action} Unload logs */
+const unloadLogsAction = function () {
+  const executor = function (global) {
+    if (
+      !Orion.WalkTo(
+        global.unloadPoint.x,
+        global.unloadPoint.y,
+        global.unloadPoint.z,
+        1
+      )
+    ) {
+      return printAction(this, 'CRITICAL cannot move to unload point!')
+    }
+
+    Orion.Say('Bank')
+    Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+
+    const logsList = Orion.FindType(CONSTANTS.TYPES.BOARDS, 0xffff)
+    if (logsList.length) {
+      logsList.forEach(function (id) {
+        Orion.MoveItem(id, 0, global.unloadContainer)
+        Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+      })
+    }
+  }
+
+  const condition = function (global) {
+    const boards = Orion.FindType(CONSTANTS.TYPES.BOARDS, 0xffff)
+    return Player.Weight() >= global.unloadWeight && boards.length
+  }
+
+  return this.action('Craft Boards', PRIORITY.MEDIUM, executor, condition)
+}
+
+/**@type {Action} Stack Boards*/
+const stackBoardsAction = function () {
+  const executor = function (global) {
+    const map = findTypeToMapOfColors(CONSTANTS.TYPES.BOARDS)
+    const colors = Object.keys(map)
+
+    printAction(this, 'Found Colors: ' + colors.length)
+
+    if (colors.length) {
+      colors.forEach(function (color) {
+        if (map[color].length > 1) {
+          map[color].forEach(function (obj) {
+            Orion.MoveItem(obj.Serial(), 0, backpack)
+            Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+          })
+        }
+      })
+    }
+  }
+
+  const condition = function (global) {
+    const boards = Orion.FindType(CONSTANTS.TYPES.BOARDS, 0xffff)
+    return boards.length
+  }
+
+  return this.action('Craft Boards', PRIORITY.MEDIUM, executor, condition)
+}
