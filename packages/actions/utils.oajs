@@ -18,12 +18,15 @@ const printAction = function (action, msg) {
  */
 function substInList(string, list) {
   var result = false
-  list.forEach(function (element) {
-    if (Orion.Contains(string, element)) {
-      print('Matched ' + element + ' to ' + string, true)
-      result = true
-    }
-  })
+  if (list && list.length) {
+    print(JSON.stringify(list))
+    list.forEach(function (element) {
+      if (Orion.Contains(string, element)) {
+        print('Matched ' + element + ' to ' + string, true)
+        result = true
+      }
+    })
+  }
 
   return result
 }

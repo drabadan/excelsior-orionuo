@@ -1,0 +1,79 @@
+//#include utils.oajs
+//#include ..\common\constants.oajs
+//#include actions.oajs
+
+/** @type {Action} Tame current animal */
+const tameCurrentAnimalAction = function () {
+  const executor = function (global) {
+    const obj = Orion.FindObject(global.currentAnimal)
+    Orion.WalkTo(obj.X(), obj.Y(), obj.Z(), 2)
+
+    Orion.WaitTargetObject(global.currentAnimal)
+    Orion.UseSkill('Animal Taming')
+    const result = Orion.WaitJournal(
+      global.successMessage + '|' + global.failMessage,
+      Orion.Now(),
+      Orion.Now() + 15000,
+      'me|sys|mobile|normal'
+    )
+
+    Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+
+    // printAction(this, result.Text())
+
+    if (result && Orion.Contains(result.Text(), global.successMessage)) {
+      Orion.Wait(300)
+      if (!global.allAnimals.length) {
+        global.initFlag = false
+        return
+      }
+      global.releaseAnimals.push(global.currentAnimal)
+      printAction(this, 'relase animals ' + global.releaseAnimals.length)
+      global.currentAnimal = global.allAnimals.pop()
+      printAction(this, 'Current animal set to: ' + global.currentAnimal)
+    }
+  }
+
+  const condition = function (global) {
+    return global.currentAnimal
+  }
+
+  return this.action('Tame current animal', PRIORITY.LOW, executor, condition)
+}
+
+/** @type {Action} Init animals */
+const initAnimalsAction = function () {
+  const executor = function (global) {
+    global.allAnimals = Orion.FindType(global.animalTypesToTame, 0xffff, ground)
+    printAction(this, 'Found animals to tame: ' + global.allAnimals.length)
+    global.currentAnimal = global.allAnimals.pop()
+    printAction(this, 'Current animal set to: ' + global.currentAnimal)
+    global.initFlag = true
+  }
+
+  const condition = function (global) {
+    return !global.initFlag
+  }
+
+  return this.action('Init animals', PRIORITY.HIGH, executor, condition)
+}
+
+//[2]	 button 20 80 4005 4007 1 0 2
+/** @type {Action} Rlease animals */
+const releaseAnimalsAction = function () {
+  const executor = function (global) {
+    while (global.releaseAnimals.length) {
+      const animalId = global.releaseAnimals.pop()
+      Orion.WaitGump(Orion.CreateGumpHook(2))
+      Orion.WaitContextMenuCliloc(animalId, 3006118)
+      Orion.RequestContextMenu(animalId)
+      Orion.Wait(CONSTANTS.WAIT_TIME.SHORT)
+    }
+  }
+
+  const condition = function (global) {
+    return global.releaseAnimals.length
+  }
+
+  return this.action('Rlease animals', PRIORITY.HIGH, executor, condition)
+}

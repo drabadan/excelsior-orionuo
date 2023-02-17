@@ -10,8 +10,11 @@ const CONSTANTS = {
     BOARDS: 0x1bd7,
   },
   WAIT_TIME: {
+    /** @type {number} 10000 */
     LONG_MS: 10000,
+    /** @type {number} 5000 */
     NORMAL: 5000,
+    /** @type {number} 2000 */
     SHORT: 2000,
   },
   BS_GUMP: {

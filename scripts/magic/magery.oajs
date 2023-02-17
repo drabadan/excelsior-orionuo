@@ -1,0 +1,15 @@
+// Paste your code here :)
+function mageryScript() {
+	while (!Player.Dead()) {
+	while (Player.Mana() > 20) {
+	Orion.WaitTargetObject(Player.Serial())
+	Orion.Cast('Wither')
+	Orion.Wait(5000)
+	}
+	
+	Orion.UseSkill('Meditation');
+	while (Player.Mana() < Player.MaxMana()) {
+		Orion.Wait(500);
+		}
+		}
+}

@@ -18,6 +18,10 @@ function cont() {
 }
 
 
+function context() {
+Orion.InfoContextMenu();
+}
+
 const ButtonList = [
   ' button 15 402 4017 4019 1 0 0 ',
   ' button 270 402 4005 4007 1 0 21 ',

@@ -1,0 +1,32 @@
+//#include packages\actions\common-actions.oajs
+//#include packages\actions\animal-taming-actions.oajs
+//#include packages\runner\script-runner.oajs
+//#include packages\common\craftables.oajs
+//#include packages\common\constants.oajs
+
+/**
+ * Rat 0x00EE
+ * Horse 0x00E2
+ */
+
+function animalTamingScript() {
+  const global = {
+    stopFlag: false,
+    initFlag: false,
+    successMessage: 'seems to accept you|looks tame|even challenging',
+    failMessage: 'fail to tame the',
+    currentAnimal: 0x0,
+    releaseAnimals: [],
+    animalTypesToTame: '0x00BB',//'0x00E9|0x00E8',//0x00E1,//0x003F, //0x00EE, //'0x00BB',//'0x00E4|00C8|0x00CC|0x00E2',
+    allAnimals: [],
+  }
+
+  const runner = scriptRunner(global)
+  runner.registerActions([
+    initAnimalsAction,
+    releaseAnimalsAction,
+    tameCurrentAnimalAction,
+  ])
+
+  runner.runWhileCan()
+}
